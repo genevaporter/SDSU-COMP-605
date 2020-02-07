@@ -1,14 +1,64 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 
-\title{Comp-605}
-\author{geneva.porter }
-\date{January 2020}
+\title{Computational Science 605: \\ Scientific Computing and Parallel Processing}
+\author{Geneva Porter}
+\date{Spring 2020}
 
 \begin{document}
 
 \maketitle
 
-\section{Introduction}
+\section{Accessing the Cluster}
+
+As of 2/6, we can only access the computing cluster while physically on the SDSU campus. From a terminal on campus, type:
+
+\begin{verbatim}
+$ ssh porter@tuckoo.sdsu.edu
+\end{verbatim}
+
+\noindent My default password is 
+
+\begin{verbatim}
+Porter_2020_SDSU
+\end{verbatim}
+
+\noindent Use nano editor (has shortcut commands to follow). We can create a new document with nano as well. Here's a quick axample of how to make, compile, and run a c++ program:
+
+\begin{verbatim}
+$ nano hello.cpp
+\end{verbatim}
+
+\noindent In the editor that appears, write the program:
+
+\begin{verbatim}
+#include <iostream>
+
+int main{
+    std::cout << "hello" << '\n';
+    return 0;
+}
+\end{verbatim}
+
+\noindent Press ctrl + O to save, then ctrl + X to exit. To compile and run, use the command prompt to write:
+
+\begin{verbatim}
+c++ hello.cpp
+./a.out
+\end{verbatim}
 
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
