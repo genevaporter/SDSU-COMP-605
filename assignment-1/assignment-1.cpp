@@ -32,18 +32,59 @@ struct timezone {
 
 
 int main(int argc, char **argv) {
-	struct timeval1 start, end;
-	gettimeofday(&start, NULL);
-
 	
+struct timeval start1, start2, end1, end2;
+double t1, t2, a1, a2; // for measuring averages
 
+// Allocate memory for A, B, C (transpose?) for up to 40,000 32-bit real values each.
+// Read A and B values from .txt file
+
+for (n=1; n <= 100, n++) { // ijk form
+
+	gettimeofday(&start1, NULL);	
 	for (int i = 0; i < 100; i++)
 	{
-		
-	}
+		for (int j = 0; i < 100; i++)
+		{
+			for (int k = 0; i < 100; i++)
+			{
 
-	gettimeofday(&end, NULL);
-	printf("ELapsed: %fs\n", ((ens.tv_sec - start.tv_sec)*100000 + end.tv_usec - start.tv_usec)/1000000.0);
+			// matrix operations
+
+			}
+		}		
+	}
+	gettimeofday(&end1, NULL);
+
+	t1 = ((end1.tv_sec - start1.tv_sec)*100000 + end1.tv_usec - start1.tv_usec)/1000000.0;
+	a1 += t1;
+
+} // end ijk-form loop
+
+	// Print matrix C
+	// deallocate memory
+	
+	a1 /= n;
+	printf("Average time elapsed for ijk-form: %.5fs\n", a1)
 
 	return 0;
 }
+
+// use 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
