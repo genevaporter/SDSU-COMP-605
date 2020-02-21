@@ -34,24 +34,34 @@ struct timezone {
 int main(int argc, char **argv) {
 	
 struct timeval start1, start2, end1, end2;
+double sum;
 double t1, t2, a1, a2; // for measuring averages
 
 // Allocate memory for A, B, C (transpose?) for up to 40,000 32-bit real values each.
+
+
+
 // Read A and B values from .txt file
 
-for (n=1; n <= 100, n++) { // ijk form
 
+
+length_i = ;
+length_j = ;
+length_k = ;
+
+for (int n=1; n <= 100, n++) { // ijk form
 	gettimeofday(&start1, NULL);	
+
 	for (int i = 0; i < 100; i++)
 	{
-		for (int j = 0; i < 100; i++)
+		for (int j = 0; j < 100; j++)
 		{
-			for (int k = 0; i < 100; i++)
+			sum = 0;
+			for (int k = 0; k < 100; k++)
 			{
-
-			// matrix operations
-
+				sum += A[i][k] * B[k][j];
 			}
+		C[i][j] = sum;
 		}		
 	}
 	gettimeofday(&end1, NULL);
@@ -61,11 +71,38 @@ for (n=1; n <= 100, n++) { // ijk form
 
 } // end ijk-form loop
 
+for (int m=1; m <= 100, m++) { // jki form
+	gettimeofday(&start2, NULL);	
+
+	for (j = 0; j < 100; j++)
+	{
+		for (i = 0; i < 100; i++)
+		{
+			sum = 0;
+		}
+		for (k = 0; k < 100; k++)
+			for (i = 0; i < 100; i++)
+			{
+				sum += A[i][k] * B[k][j];
+			}
+		C[i][j] = sum;
+		}		
+	}
+	gettimeofday(&end2, NULL);
+
+	t2 = ((end2.tv_sec - start2.tv_sec)*100000 + end2.tv_usec - start2.tv_usec)/1000000.0;
+	a2 += t2;
+
+} // end jki-form loop
+
 	// Print matrix C
 	// deallocate memory
 	
 	a1 /= n;
 	printf("Average time elapsed for ijk-form: %.5fs\n", a1)
+
+	a2 /= m;
+	printf("Average time elapsed for jki-form: %.5fs\n", a2)
 
 	return 0;
 }
