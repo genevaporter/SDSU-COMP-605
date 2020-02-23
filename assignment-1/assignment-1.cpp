@@ -11,111 +11,131 @@
  */
 
 
-#include <sys/time>
-#include <stdlib>
-#include <stdio>
+#include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include <fstream>
+#include <iostream>
+#include <string>
+
+#include <iomanip>
+
+using namespace std;
 
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 int settimeofday(const struct timeval *tv, const struct timezone *tz);
 
-struct timeval {
-	time_t tv_sec;
-	suseconds_t tv_usec;
-};
-
-struct timezone {
-	int tz_minutesweat;
-	int tz_dsttime;
-};
-
-
 int main(int argc, char **argv) {
-	
-struct timeval start1, start2, end1, end2;
-double sum;
-double t1, t2, a1, a2; // for measuring averages
 
-// Allocate memory for A, B, C (transpose?) for up to 40,000 32-bit real values each.
+    // variables used in loops	
+    struct timeval start1, start2, end1, end2;
+    double sum;
+    double t1, t2, a1, a2;
+    int number_of_multiplications, i, j, k, m, n, w, x, y, z;
+    int ijk[3];
+    string temp;
 
-// Read A and B values from .txt file: first line will be equal to the number of final matricies produced (skip line). Header line is 3 numbers (a,b,c) that correspond to matrix dimension (skip line). A is axb, B is bxc, final C is axc. After each header are two matricies that must be multiplied, with a skip line in between. 
+    // Allocate memory for A, B, C (transpose?) for up to 40,000 32-bit real values each.
 
-// read first line in txt file for number of matricies, store as number_of_multiplications
-ofstream input;
-input.open("input2.txt.txt");
-getline(input, first_line);
-double number_of_multiplications = atof(first_line);
+    // Reading input file, determining how many matrix multiplications are needed.
+    ifstream all_matricies("input2.txt");
+    all_matricies >> number_of_multiplications;
+    cout << number_of_multiplications << "\n\n";
+    ofstream solution("output_solution.txt");
 
-for (int x = 1; x <number_of_multiplications, x++)
+//*
+    // Total matrix multiplication loop
+    for (w = 1; w < number_of_multiplications; w++) {
 
-// read next line for matrix dimensions. 
-// first number = i, second number = k, third number = j
-// allocate memory for C
-// read fir matrix for A
-// read second matrix for B
-
-for (int n=1; n <= 100, n++) { // ijk form
-	gettimeofday(&start1, NULL);	
-
-	for (int i = 0; i < 100; i++)
-	{
-		for (int j = 0; j < 100; j++)
-		{
-			sum = 0;
-			for (int k = 0; k < 100; k++)
-			{
-				sum += A[i][k] * B[k][j];
-			}
-		C[i][j] = sum;
-		}		
+	// Finding needed dimensions for A, B, and C
+	for (x = 0; x < 3; x++) {
+	    all_matricies >> ijk[x];
 	}
-	gettimeofday(&end1, NULL);
 
-	t1 = ((end1.tv_sec - start1.tv_sec)*100000 + end1.tv_usec - start1.tv_usec)/1000000.0;
-	a1 += t1;
+	double A[ijk[0]][ijk[1]], B[ijk[1]][ijk[2]], C[ijk[0]][ijk[2]];	
 
-} // end ijk-form loop
+	// Creating matrix A
+	for (y=0; y < ijk[0]; y++) {
+	    for (z=0; z < ijk[1]; z++) {
+		all_matricies >> A[y][z];
+	    }
+	}
 
-for (int m=1; m <= 100, m++) { // jki form
-	gettimeofday(&start2, NULL);	
+	// Creating matrix B
+	for (y=0; y < ijk[1]; y++) {
+	    for (z=0; z < ijk[2]; z++) {
+		all_matricies >> B[y][z];
+	    }
+	}
 
-	for (j = 0; j < 100; j++)
-	{
-		for (i = 0; i < 100; i++)
-		{
-			sum = 0;
+	// ijk-form matrix multiplication loop
+	for (n=1; n <= 100; n++) { 
+	    gettimeofday(&start1, NULL);	
+
+	    for (i = 0; i < ijk[0]; i++) {
+		for (j = 0; j < ijk[2]; j++) {
+		    sum = 0;
+		    for (k = 0; k < ijk[1]; k++) {
+			sum += A[i][k] * B[k][j];
+		    }
+		    C[i][j] = sum;
+		}		
+	    }
+	    gettimeofday(&end1, NULL);
+
+	    t1 = ((end1.tv_sec - start1.tv_sec)*100000 + end1.tv_usec - start1.tv_usec)/1000000.0;
+	    a1 += t1;
+	}// end ijk-form loop
+
+	// jki-form matrix multiplication loop
+	for (m=1; m <= 100; m++) { 
+	    gettimeofday(&start2, NULL);	
+
+	    for (j = 0; j < ijk[2]; j++) {
+		for (i = 0; i < ijk[0]; i++) {
+		    sum = 0;
 		}
-		for (k = 0; k < 100; k++)
-			for (i = 0; i < 100; i++)
-			{
-				sum += A[i][k] * B[k][j];
-			}
-		C[i][j] = sum;
+		for (k = 0; k < ijk[1]; k++) {
+		    for (i = 0; i < ijk[0]; i++) {
+			sum += A[i][k] * B[k][j];
+		    }
+		    C[i][j] = sum;
 		}		
-	}
-	gettimeofday(&end2, NULL);
+	    }
+	    gettimeofday(&end2, NULL);
 
-	t2 = ((end2.tv_sec - start2.tv_sec)*100000 + end2.tv_usec - start2.tv_usec)/1000000.0;
-	a2 += t2;
+	    t2 = ((end2.tv_sec - start2.tv_sec)*100000 + end2.tv_usec - start2.tv_usec)/1000000.0;
+	    a2 += t2;
+	}// end jki-form loop
 
-} // end jki-form loop
-}
-
-	// Print matrix C
+	// Print and store matrix C
 	
+	for (i=0; i < ijk[0]; i++) {
+	    for (j=0; j < ijk[2]; j++) {
+		if (j == ijk[2]-1) {
+		    solution << fixed << setprecision(5) << C[i][j] << '\n';
+		} else {
+		    solution << fixed << setprecision(5) << C[i][j] << " ";
+		}
+	    }
+	}
+	solution << '\n';	    
 	
 	// deallocate memory
 	
 	a1 /= n;
-	printf("Average time elapsed for ijk-form: %.5fs\n", a1)
+	printf("Average time elapsed for ijk-form: %.5fs\n", a1);
 
 	a2 /= m;
-	printf("Average time elapsed for jki-form: %.5fs\n", a2)
+	printf("Average time elapsed for jki-form: %.5fs\n", a2);
 
 	return 0;
+    } // end matrix multiplication loop
+
+    solution.close();
 }
 
-// use 
 
 
 
