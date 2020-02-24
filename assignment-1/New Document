@@ -1,0 +1,117 @@
+==56620== Conditional jump or move depends on uninitialised value(s)
+==56620==    at 0x1870962: nsHTMLDocument::MaybeEditingStateChanged()
+==56620==    <more stack trace lines omitted>
+
+Mats Palmgren investigated, but wasn’t able to determine the cause. His conclusion was:
+
+
+
+The only possible explanations I can think of is either a bug in valgrind itself, or we make bogus VALGRIND_* calls to misinform it about the status of this memory.  AFAICT, jemalloc is only place we use VALGRIND_* macros… and I traced all of those and I don’t see any suspicious calls…
+
+
+
+It turns out that the Memcheck was right, and the problem was real.  So why did Mats have trouble understanding what Valgrind was trying to tell him?
+
+
+Tracking undefined values
+
+Memcheck tracks every single value bit present in a running program, and tracks whether it is defined or undefined.  Undefined values arise from certain kinds of allocations;  for example, stack- and heap-allocated memory is undefined if it is not initialised.  Furthermore, undefinedness gets propagated through all operations.  For example, if you add an undefined value to a defined value, the result is undefined.
+
+
+Actually, because the definedness tracking is bit-level, it’s much more complicated than that:  you can have partially defined values due to bit-field operations, and for every arithmetic operation Memcheck has to determine how undefined bits in the inputs can lead to undefined bits in the output.  This paper describes how it works in detail. It’s quite amazing that Memcheck is able to do this so accurately and efficiently, and Julian Seward deserves a great deal of credit for this minor miracle of code engineering.  (For those of you who have used Purify, this bit-precise definedness tracking is one of the main things that distinguishes Memcheck from Purify.)  Furthermore, the technique can be to track any binary property, and has been reused in tools tracking which bits are tainted and which bits are secret.
+
+
+Anyway, the gory details don’t really matter.  What does matter is that when Memcheck complains that a “Conditional jump or move depends on uninitialised value(s)” — “undefined” would arguably be better in that message than “uninitialised”, but that message hasn’t changed for years — it’s determined that an undefined value is being used in a dangerous way.  And it’s almost always right.
+
+
+But I still haven’t answered the original question of why Mats found the message hard to understand.
+
+
+An infection chain
+
+In my previous post I defined the terms defect, infection and failure, which are the three stages of a “bug”, and together consitute an infection chain.  If you haven’t read that post, or know of these terms from elsewhere, I suggest you read that post before continuing.
+
+
+What’s the relevant defect here?  It’s almost always that the code fails to initialise a value (e.g. a variable or field).
+
+
+What’s the infection?  When the defective code is executed, the value ends up undefined, which means it’s probably incorrect.  But it’s not guaranteed to be incorrect — you might be lucky (or arguably unlucky) and the garbage value ends up being the same as the one that would have been assigned.  (This is most common with heap allocations, which in practice often result in all the allocated memory being zeroed.)
+
+
+How does the infection propagate?  Well, once you have a possibly incorrect value, there are many ways for things to go wrong:
+
+
+
+If an incorrect value is used as an input to an operation that writes a result, such as an assignment, arithmetic operation or system call, the likely result another incorrect value (a further infection).  But this isn’t guaranteed, e.g. if you bitwise-AND an incorrect value with 0, the result is always 0.
+
+If an incorrect value is used as an input to an operation with user-visible side-effects (e.g. a system call or an assertion), a possible result is incorrect output or an abort (both failures).
+
+If an incorrect value is used as an address in an operation that accesses memory, it might lead to an incorrect value in the load/store destination (more infections).  Or it could cause inappropriate memory to be accessed, leading to a crash (a failure).
+
+If an incorrect value is used in a conditional branch, or as a jump target, that can lead to an incorrect program counter (another infection), which can lead to failures such as incorrect behaviour, or crashes (if the jump destination is sufficiently bogus).
+
+
+In other words, incorrect values can lead to all sorts of problems.  And that’s why failing to initialise values can lead to such insidious bugs — the range of possible outcomes is extremely wide.
+
+
+Back to Memcheck
+
+So where in this chain does Memcheck complain?  Ideally it would be as soon as the defect is executed.  But that could lead to false positives — it’s possible that the value will be initialised later, before being used in dangerous ways.
+
+
+You might think that Memcheck should complain if an undefined value is used in any way.  But that too would lead to false positives — it turns that normal programs copy around lots of undefined values, because of padding within structures.  (Indeed, we’ve tried doing exactly this with Memcheck, and it results in hundreds of warnings for trivial programs like Hello World.)
+
+
+You might think that Memcheck should complain if an undefined value is used in an arithmetic operation.  Again, it doesn’t, because such an operation is not necessarily dangerous;  it depends if the resulting value is undefined and how it is then used.
+
+
+Really, the problem is that it’s hard to tell if an undefined value constitutes an infection — doing that requires knowing the programmer’s intention.
+
+
+What Memcheck does is complain when the use of an undefined value is very likely to lead to defects:
+
+
+
+In the condition of a conditional branch or test, or the target address of a branch, because it is likely to lead to incorrect control flow, which will lead to incorrect behaviour.  (The complaint above was an example of this.)
+
+As an argument to a system call, because it is likely to cause an incorrect externally-visible side-effect.
+
+As the address in a load or store, because it could cause a crash.
+
+
+The end result of this is that the place where Memcheck complains can be quite some distance from the defect, and also quite some distance from any failures that manifest as a result.  This is why Mats had trouble with this warning.
+
+
+People often ask “can’t you do more eager checking?”  It should be clear by now that there are trade-offs between how early definedness problems are reported and how many false positives you get.  It’s not clear that there’s a single best answer, but the Valgrind developers have given this matter lots of thought over many years and it’s probably not going to change any time soon!  But do not despair…
+
+
+So how do I get better information?
+
+When Memcheck complains about a dangerous use of an undefined value, you need to work backwards to find the defect — the missing initialisation.  In easy cases, you can do this in your head, just by looking at the code.
+
+
+If you’re still stumped, you can insert the Memcheck client requests VALGRIND_CHECK_MEM_IS_DEFINED or VALGRIND_CHECK_VALUE_IS_DEFINED into your code to determine which variables are undefined at different points in your code.  These can be very helpful, but they’re a bit laborious because you have to recompile your code every time you want to insert a new one.  But for over seven years that was the best way to do it.
+
+
+However, Valgrind 3.4.0 introduced a new option, –track-origins=yes.  What it does is, for every undefined value, it tracks where the undefinedness originated.  The origin is usually a stack or heap allocation.  With –track-origins=yes, each complaint about an undefined value will be augmented with origin information like this:
+
+
+==29553==  Uninitialised value was created by a stack allocation
+==29553==    at 0x400968: main (origin1-yes.c:23)
+
+or this:
+
+
+==29553==  Uninitialised value was created by a heap allocation
+==29553==    at 0x4C2758C: malloc (vg_replace_malloc.c:192)
+==29553==    by 0x400A6F: main (origin1-yes.c:61)
+
+This is useful because the missing initialisation — the defect — is very often supposed to occur immediately after the allocation.  So origin-tracking usually takes you immediately to the actual defect.  This is one of those features that probably doesn’t seem that impressive unless you’ve had to deal with this problem before, in which case you’ll realise it can be a godsend.
+
+
+By default, –track-origins is not turned on.  This is because it slows Memcheck down a lot, because of all the extra origin information that must be propagated.  But if you have undefined value warnings, you should turn it on immediately!
+
+
+With this information, Mats was able to track down the defect:  a constructor failed to initialise two fields.  Hooray!  And just think, if C++ warned about fields uninitialised by constructors, all these heroics wouldn’t be necessary 🙂
+
+
