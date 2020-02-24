@@ -3,9 +3,10 @@
  * 1. Use strictly serial computations (matrix-vactor, vector-matrix)
  * 2. Measure execution times of multiplication
  * 3. Make FAST and ELEGANT!
- * 4. Use <gprof> profiler and check for memory leaks with <valgrind>
- *
- * valgrind --tool=memcheck --leak-check=yes ./your_binary
+ * 4. Check for memory leaks with valgrind:
+ *    >> valgrind --tool=memcheck --leak-check=yes ./assignment-1.cpp
+ * 5. Compile with and without optimization flags:
+ *    >> g++ -O3 assignment-1.cpp
  *
  * Check out compiler explorer at godbolt.org
  */
@@ -42,7 +43,7 @@ int main(int argc, char **argv) {
     // Reading input file, determining how many matrix multiplications are needed.
     ifstream all_matricies("input2.txt");
     all_matricies >> number_of_multiplications;
-    ofstream solution("output_solution.txt");
+    ofstream solution("output-solutions.txt");
 
     // Total matrix multiplication loop
     for (w = 1; w <= number_of_multiplications; w++) {
@@ -122,12 +123,12 @@ int main(int argc, char **argv) {
 	}
 	solution << '\n';	    
 
-	cout << '\n' << "For matrix C_" << w << " with dimensions "
-	     << ijk[0] << " x " << ijk[2] << ":\n"
-	     << "The average time elapsed for the ijk-form was " 
-	     << average[0] << " seconds.\n"
-	     << "The average time elapsed for the jki-form was " 
-	     << average[1] << " seconds.\n\n";
+	cout << '\n' << "For matrix C_" << w << " with dimensions ";
+	cout << ijk[0] << " x " << ijk[2] << ":\n";
+	cout << "The average time elapsed for the ijk-form was "; 
+	cout << average[0] << " seconds.\n";
+	cout << "The average time elapsed for the jki-form was "; 
+	cout << average[1] << " seconds.\n\n";
 	
 	average[0] = 0; average[1] = 0;
     }	
