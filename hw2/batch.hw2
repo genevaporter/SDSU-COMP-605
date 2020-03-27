@@ -1,10 +1,8 @@
 #! /bin/bash
-#PBS -k 0
+#PBS -k o
 #PBS -l nodes=1:ppn=16:core16, walltime=30:00
-#PBS -N job_name
+#PBS -N hw2
 #PBS -j oe
-./hw2
-qsub batch.hw2
-qstat -a
-qstat -n
-qdel job_name
+
+g++ hw2.cpp -fopenmp
+./a.out 16
