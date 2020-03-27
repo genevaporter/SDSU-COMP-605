@@ -13,7 +13,7 @@
 \begin{document}
 %\maketitle
 \begin{center}
-	{\Huge COMP-605 Homework 2}
+	{\huge COMP-605 Homework 2}
 	
 	\vspace{5mm}
 	
@@ -26,7 +26,11 @@
 	\vspace{5mm}
 \end{center}
 
-For this assignment, I used the cluster to run parallel threads using Open MP. Below is an example table of one of the iterations:
+For this assignment, I used the cluster to run parallel threads using Open MP. For some reason, I was having trouble with my script, so I just ran it with the command 
+\begin{verbatim}
+    bash ./batch.hw2
+\end{verbatim}
+The number of threads needs to be changed manually in the script...sorry. It is currently set to 16. Below is an example table of one of the iterations:
 
 \begin{table}[h]
     \centering
@@ -50,7 +54,7 @@ For this assignment, I used the cluster to run parallel threads using Open MP. B
 	\caption{Iteration information when passing 16 into the thread count argument.}
 \end{table}
 
-Since threads are running simultaneously, we can see that they print out of order. (Note that sometimes, two lines will print as one). We can see that as N increases, the approximation value tends toward zero. I tried this code using 1 billion iterations, and got an approximation of $\pi$ to 6 decimal places (I expected musch higher accuracy for that number of iterations, but oh well). Also, since I used different loops for parallelization, I only captured the thread number used for printing the table of results. The desired number of threads can be passed as an argument when running the .cpp file.
+Since threads are running simultaneously, we can see that they print out of order. We can see that as N increases, the approximation value tends toward $\pi$. I tried this code using 1 billion iterations, and got an approximation of $\pi$ to 6 decimal places. I expected musch higher accuracy for that number of iterations. Also, since I used different loops for parallelization, I only captured the thread number used for printing the table of results. The desired number of threads can be passed as an argument when running the .cpp file.
 
 Memory leaks were checked, and although valgrind threw some errors regarding initialization, all heap blocks were freed and no leaks were possible. I struggled with choosing which omp modifiers to use that would best parallelize my code, however I found that I had to break it up into smaller loops to work. I thought I did adequately given my time constraints (thought I would be dropping the class, found out differently on Tuesday).
 
