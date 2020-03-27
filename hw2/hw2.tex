@@ -30,16 +30,28 @@ For this assignment, I used the cluster to run parallel threads using Open MP. B
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{|c|c|c|} \hline
-        ~ & N & Approximation & Thread # used when printing \\ \hline
-         No optimization (-O0 flag)&  0.0023799 & 0.00275436\\ \hline
-         With optimization (-O3 flag)& 0.00051495 & 0.000476634 \\ \hline
+    \begin{tabular}{|l|l|c|} \hline
+    N & Approximation & Thread # \\ \hline
+    200000         &3.1402         &3         \\ \hline      
+    900000         &3.140706667    &14     \\ \hline         
+    600000         &3.140866667    &9      \\ \hline         
+    100000         &3.14056        &1      \\ \hline         
+    800000         &3.14109        &12      \\ \hline        
+    1000000        &3.140928       &15      \\ \hline        
+    10             &3.2            &0       \\ \hline        
+    100            &3.04           &0        \\ \hline       
+    1000           &3.06           &0        \\ \hline       
+    10000          &3.1108         &0       \\ \hline        
+    500000         &3.140928       &7        \\ \hline       
+    400000         &3.14043        &6        \\ \hline       
+    700000         &3.14072        &11        \\ \hline      
+    300000         &3.14136        &4   \\ \hline
     \end{tabular}
-	\caption{Run times for $50\times50$ matrix}
+	\caption{Iteration information when passing 16 into the thread count argument.}
 \end{table}
 
-We can see that as N increases, the approximation value tends toward zero. I tried this code using 1 billion iterations, and got an approximation of $\pi$ to 6 decimal places (I expected musch higher accuracy for that number of iterations, but oh well). Also, since I used different loops for parallelization, I only captured the thread number used for printing the table of results. The desired number of threads can be passed as an argument when running the .cpp file.
+Since threads are running simultaneously, we can see that they print out of order. (Note that sometimes, two lines will print as one). We can see that as N increases, the approximation value tends toward zero. I tried this code using 1 billion iterations, and got an approximation of $\pi$ to 6 decimal places (I expected musch higher accuracy for that number of iterations, but oh well). Also, since I used different loops for parallelization, I only captured the thread number used for printing the table of results. The desired number of threads can be passed as an argument when running the .cpp file.
 
-Memory leaks were checked, and although valgrind threw some errors regarding initialization, all heap blocks were freed and no leaks were possible. I struggled with choosing which omp modifiers to use that would best parallelize my code, however I found that I had to break it up into smaller loops to work.
+Memory leaks were checked, and although valgrind threw some errors regarding initialization, all heap blocks were freed and no leaks were possible. I struggled with choosing which omp modifiers to use that would best parallelize my code, however I found that I had to break it up into smaller loops to work. I thought I did adequately given my time constraints (thought I would be dropping the class, found out differently on Tuesday).
 
 \end{document}
