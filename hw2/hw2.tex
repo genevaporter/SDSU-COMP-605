@@ -1,0 +1,45 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{nopageno}
+\usepackage[margin=1.15in]{geometry}
+
+\pagestyle{plain}
+
+\title{Computational Science 605: Homework 2}
+\author{Geneva Porter}
+\date{26 March 2020}
+
+\begin{document}
+%\maketitle
+\begin{center}
+	{\Huge COMP-605 Homework 2}
+	
+	\vspace{5mm}
+	
+	{\Large Dr. J Corbino, SDSU}
+	
+	\vspace{5mm}
+	
+	{\large Geneva Porter, February 24 2020}
+	
+	\vspace{5mm}
+\end{center}
+
+For this assignment, I used the cluster to run parallel threads using Open MP. Below is an example table of one of the iterations:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|} \hline
+        ~ & N & Approximation & Thread # used when printing \\ \hline
+         No optimization (-O0 flag)&  0.0023799 & 0.00275436\\ \hline
+         With optimization (-O3 flag)& 0.00051495 & 0.000476634 \\ \hline
+    \end{tabular}
+	\caption{Run times for $50\times50$ matrix}
+\end{table}
+
+We can see that as N increases, the approximation value tends toward zero. I tried this code using 1 billion iterations, and got an approximation of $\pi$ to 6 decimal places (I expected musch higher accuracy for that number of iterations, but oh well). Also, since I used different loops for parallelization, I only captured the thread number used for printing the table of results. The desired number of threads can be passed as an argument when running the .cpp file.
+
+Memory leaks were checked, and although valgrind threw some errors regarding initialization, all heap blocks were freed and no leaks were possible. I struggled with choosing which omp modifiers to use that would best parallelize my code, however I found that I had to break it up into smaller loops to work.
+
+\end{document}
