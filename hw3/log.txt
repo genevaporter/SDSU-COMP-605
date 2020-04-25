@@ -1,0 +1,8 @@
+  local address:  LID 0x0010, QPN 0x00198b, PSN 0x297663, GID ::
+  remote address: LID 0x0009, QPN 0x001d31, PSN 0x28a065, GID ::
+2000000000 bytes in 0.52 seconds = 30492.10 Mbit/sec
+1000 iters in 0.52 seconds = 524.73 usec/iter
+
+Running porter_pingpong :
+2000000000 bytes in 0.386287 seconds = 5177.5 Mbit/sec
+1000 iters in 0.386287 seconds = 386.287 usec/iter
