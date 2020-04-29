@@ -4,5 +4,14 @@
 #PBS -N hw2
 #PBS -j oe
 
-g++ hw2.cpp -fopenmp
-./a.out 16
+THREAD_NUMBER="$1"
+
+if [ -z "$1" ]
+then 
+	echo "Invalid/missing argument. Threads will be set to 2"
+	THREAD_NUMBER="2"
+fi
+
+g++ hw2.cpp -fopenmp -o hw2
+./hw2 $THREAD_NUMBER
+
