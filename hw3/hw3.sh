@@ -15,3 +15,25 @@ cd /home/605/porter/hw3/
 mpic++ -Wall -o porter_pingpong hw3.cpp
 mpirun -np 2 ./porter_pingpong $MESSAGE_SIZE $ITERATIONS
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
